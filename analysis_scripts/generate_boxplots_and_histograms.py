@@ -36,13 +36,16 @@ def main(argv=None):
     usage = """
         As input, this script takes the experimental survey and the FEP benchmark data as input. The FEP data can be in
         CSV format (e.g from ../21_4_results/ligand_predictions) or as FMP format (e.g. from 
-        ../21_4_results/processed_output_fmps). 
+        ../21_4_results/processed_output_fmps). The FMP or CSV files must be grouped in subdirectories of the input 
+        leading directory. 
         
         The plot that was used in the publication using the output FEP+ FMP files was created using 
-        > $SCHRODINGER/run python3 generate_boxplots_and_histograms.py --fep_dir ../21_4_results/processed_output_fmps -e fmp --exp_files ../experimental_survey_data/*/*csv -o scatterplot_exp_fep.png
+        
+            > $SCHRODINGER/run python3 generate_boxplots_and_histograms.py --fep_dir ../21_4_results/processed_output_fmps -e fmp --exp_files ../experimental_survey_data/*/*csv -o scatterplot_exp_fep.png
         
         Alternatively, the CSV output files can also be be processed by this script. 
-        > python3 generate_boxplots_and_histograms.py --fep_dir ../21_4_results/ligand_predictions/ -e csv --exp_files ../experimental_survey_data/*/*csv -o scatterplot_exp_fep_from_csv.png
+        
+            > python generate_boxplots_and_histograms.py --fep_dir ../21_4_results/ligand_predictions/ -e csv --exp_files ../experimental_survey_data/*/*csv -o scatterplot_exp_fep_from_csv.png
         """
     description = """
         The left panel shows boxplots comparing the root-mean-square error (RMSE) between relative binding free energies
