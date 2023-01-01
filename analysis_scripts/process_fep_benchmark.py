@@ -1,6 +1,6 @@
 import analysis_functions as af
 import argparse
-
+import importlib
 from glob import glob
 import os
 def main(argv=None):
@@ -68,6 +68,10 @@ def main(argv=None):
         help='Option to print in standard-output latex formatted tables of the group results.',
         default=False)
     args = parser.parse_args(argv)
+
+    if args.ext == 'fmp':
+        if importlib.util.find_spec('schrodinger') is None:
+            raise Exception('Schrodinger must be installed to use FMP files as input. Use CSV files instead.')
 
     files = []
     for entry in glob(f'{args.upper_dir}/*'):

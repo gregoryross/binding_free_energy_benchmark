@@ -1,6 +1,6 @@
 import analysis_functions as af
 import argparse
-
+import importlib
 from glob import glob
 import os
 import pandas as pd
@@ -54,6 +54,10 @@ def main(argv=None):
         choices=['fmp', 'csv'],
         help="The file extension of the results. Results can be either FMP files or CSVs.")
     args = parser.parse_args(argv)
+
+    if args.ext == 'fmp':
+        if importlib.util.find_spec('schrodinger') is None:
+            raise Exception('Schrodinger must be installed to use FMP files as input. Use CSV files instead.')
 
     group_summaries = []
     for entry in glob(f'{args.upper_dir}/*'):

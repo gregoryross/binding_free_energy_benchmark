@@ -1,6 +1,5 @@
 import analysis_functions as af
-import helper_functions as hf
-
+import importlib
 import matplotlib.pylab as plt
 import numpy as np
 from scipy import stats
@@ -81,6 +80,10 @@ def main(argv=None):
 
 
     args = parser.parse_args(argv)
+
+    if args.ext == 'fmp':
+        if importlib.util.find_spec('schrodinger') is None:
+            raise Exception('Schrodinger must be installed to use FMP files as input. Use CSV files instead.')
 
     ##################################
     ### Load the experimental data ###
