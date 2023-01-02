@@ -7,12 +7,12 @@ def main(argv=None):
         free energy comparisons. This data has been taken from publicly assessible sources and the CSV filenames have
         been hard-coded in this script. 
          
-        > python3 process_experimental_survey.py directory1
+        > python process_experimental_survey.py directory1
             
         Optionally, a second directory can also be supplied. This second directory is expected to contain the comparative
         binding free energy data from Schrodinger's drug discovery projects. 
         
-        > python3 process_experimental_survey.py directory1 --drug_discovery_dir directory2
+        > python process_experimental_survey.py directory1 --drug_discovery_dir directory2
         """
     description = """
         Estimate the degree of reproducibility of experimental measured binding free energies using comparative assay

@@ -1,6 +1,6 @@
 import analysis_functions as af
 import argparse
-
+import importlib
 from glob import glob
 import os
 import pandas as pd
@@ -12,13 +12,13 @@ def main(argv=None):
     
         upper_dir
             ├── group_1 
-                  ├── system_1_out.fmp 
-                  ├── system_2_out.fmp 
-                  ├── system_3_out.fmp 
+                  ├── system_1_out.fmp (or .csv)
+                  ├── system_2_out.fmp (or .csv)
+                  ├── system_3_out.fmp (or .csv)
             ├── group_2 
-                  ├── system_A_out.fmp 
-                  ├── system_B_out.fmp 
-                  ├── system_C_out.fmp 
+                  ├── system_A_out.fmp (or .csv)
+                  ├── system_B_out.fmp (or .csv)
+                  ├── system_C_out.fmp (or .csv)
             
     then this script can be run with
     
@@ -28,12 +28,14 @@ def main(argv=None):
         
         > $SCHRODINGER/run python3 write_group_summary_tables.py ../21_4_results/processed_output_fmps -e fmp
     
-    or, if using CSV files:
+    or, if you do not have a Schrodinger installation, you can use CSV files with:
     
-        > python3 write_group_summary_tables.py ../21_4_results/ligand_predictions -e csv
+        > python write_group_summary_tables.py ../21_4_results/ligand_predictions -e csv
     
-    Using the CSVs files in ../21_4_results/ligand_predictions only provides approximately accurate statistics as 
+    NOTE: using the CSVs files in ../21_4_results/ligand_predictions only provides approximately accurate statistics as 
     ligands with multple protomers or tautomers are over-counted.
+    
+    The output CSVs are written to the working directory.
     """
     description = """
     Write out the per-group FEP+ accuracy results to CSV files as well as the summary accuracy for each group.
@@ -52,6 +54,10 @@ def main(argv=None):
         choices=['fmp', 'csv'],
         help="The file extension of the results. Results can be either FMP files or CSVs.")
     args = parser.parse_args(argv)
+
+    if args.ext == 'fmp':
+        if importlib.util.find_spec('schrodinger') is None:
+            raise Exception('Schrodinger must be installed to use FMP files as input. Use CSV files instead.')
 
     group_summaries = []
     for entry in glob(f'{args.upper_dir}/*'):
@@ -76,7 +82,6 @@ def main(argv=None):
                            results['number of compounds'].sum(),
                            af.summarize_fep_error(results, verbose=False)]
             group_summaries.append(summary)
-
 
     # Now write out the summary table for each group. Every stat has confidence intervals calculated by boostrap
     # sampling.

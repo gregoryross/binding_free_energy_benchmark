@@ -85,7 +85,8 @@ def main(argv=None):
         free energy comparisons and the FEP+ data. The data sets that this script expects are hard-coded.
         
         To generate the plot used in the publication, the following command was used: 
-        > python3 generate_scatter_plots.py scatterplot_data
+        
+            > python generate_scatter_plots.py scatterplot_data -o scatterplot.png
         """
     description = """
         Scatter plots showing the range of agreement of dGs between different experimental assays (top row) and 

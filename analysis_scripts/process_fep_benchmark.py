@@ -1,6 +1,6 @@
 import analysis_functions as af
 import argparse
-
+import importlib
 from glob import glob
 import os
 def main(argv=None):
@@ -11,13 +11,13 @@ def main(argv=None):
     
         upper_dir
             ├── group_1 
-                  ├── system_1_out.fmp 
-                  ├── system_2_out.fmp 
-                  ├── system_3_out.fmp 
+                  ├── system_1_out.fmp (or .csv)
+                  ├── system_2_out.fmp (or .csv)
+                  ├── system_3_out.fmp (or .csv)
             ├── group_2 
-                  ├── system_A_out.fmp 
-                  ├── system_B_out.fmp 
-                  ├── system_C_out.fmp 
+                  ├── system_A_out.fmp (or .csv)
+                  ├── system_B_out.fmp (or .csv)
+                  ├── system_C_out.fmp (or .csv)
             
     then this script can be run with
     
@@ -27,12 +27,12 @@ def main(argv=None):
         
         > $SCHRODINGER/run python3 process_fep_benchmark.py ../21_4_results/processed_output_fmps -e fmp 
     
-    Alternatively, the aggregate statistics can be esitimate with the CSVs in ../21_4_results/ligand_predictions
+    Alternatively, the aggregate statistics can be estimated with the CSVs in ../21_4_results/ligand_predictions
         
-        > python3 process_fep_benchmark.py ../21_4_results/ligand_predictions -e csv
+        > python process_fep_benchmark.py ../21_4_results/ligand_predictions -e csv
     
     Using the CSVs files in ../21_4_results/ligand_predictions only provides approximately accurate statistics as 
-    ligands with multple protomers or tautomers are over-counted. Ligands with multple protomers or tautomers are 
+    ligands with multiple protomers or tautomers are over-counted. Ligands with multiple protomers or tautomers are 
     properly accounted for when using FMP files.
     
     Optionally, formatted latex tables that show the accuracy of each system and group can be generated with the 
@@ -40,7 +40,7 @@ def main(argv=None):
         
         > $SCHRODINGER/run python3 process_fep_benchmark.py ../21_4_results/processed_output_fmps -e fmp --latex_tables
     
-    These latex tables were used in the supporting information of the accomapnying manuscript.
+    These latex tables were used in the supporting information of the accompanying manuscript.
     """
     description = """
     Assess the accuracy of the FEP+ benchmark using the same metrics as discussed in the maximal and current accuracy of 
@@ -68,6 +68,10 @@ def main(argv=None):
         help='Option to print in standard-output latex formatted tables of the group results.',
         default=False)
     args = parser.parse_args(argv)
+
+    if args.ext == 'fmp':
+        if importlib.util.find_spec('schrodinger') is None:
+            raise Exception('Schrodinger must be installed to use FMP files as input. Use CSV files instead.')
 
     files = []
     for entry in glob(f'{args.upper_dir}/*'):
