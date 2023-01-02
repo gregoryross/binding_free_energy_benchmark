@@ -34,13 +34,6 @@ def main(argv=None):
     Using the CSVs files in ../21_4_results/ligand_predictions only provides approximately accurate statistics as 
     ligands with multiple protomers or tautomers are over-counted. Ligands with multiple protomers or tautomers are 
     properly accounted for when using FMP files.
-    
-    Optionally, formatted latex tables that show the accuracy of each system and group can be generated with the 
-    --latex_tables flag, but only when using FMP files:
-        
-        > $SCHRODINGER/run python3 process_fep_benchmark.py ../21_4_results/processed_output_fmps -e fmp --latex_tables
-    
-    These latex tables were used in the supporting information of the accompanying manuscript.
     """
     description = """
     Assess the accuracy of the FEP+ benchmark using the same metrics as discussed in the maximal and current accuracy of 
@@ -61,12 +54,6 @@ def main(argv=None):
         type=str,
         choices=['fmp', 'csv'],
         help="The file extension of the results. Results can be either FMP files or CSVs.")
-    parser.add_argument(
-        '--latex_tables',
-        action='store_true',
-        dest='latex_tables',
-        help='Option to print in standard-output latex formatted tables of the group results.',
-        default=False)
     args = parser.parse_args(argv)
 
     if args.ext == 'fmp':
@@ -102,22 +89,6 @@ def main(argv=None):
     print('-----------------------')
     af.summarize_fep_error(results)
     print()
-
-    if args.latex_tables and args.ext == 'fmp':
-        print('Individual set summaries')
-        print('------------------------')
-
-        #fmpnames = hf.read_outfiles(args.file_list[i])
-        for entry in glob(f'{args.upper_dir}/*'):
-            if os.path.isdir(entry):
-                files = glob(f'{entry}/*{args.ext}')
-                if len(files) >= 1:
-                    print(entry)
-                    af.print_latex_table(files)
-                    print()
-                    print()
-    elif args.latex_tables and args.ext != 'fmp':
-        print('Latex summary tables can only printed for FMP results files.')
 
 
 if __name__== '__main__':

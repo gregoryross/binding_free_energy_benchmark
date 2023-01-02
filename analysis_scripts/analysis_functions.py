@@ -2,12 +2,9 @@ import numpy as np
 from scipy import stats
 import pandas as pd
 
-# Only load schrodinger's tools if the package is available.
-import importlib
-found_schrodinger = importlib.util.find_spec('schrodinger') is not None
-if found_schrodinger:
-    from schrodinger.application.scisol.packages.fep.graph import Graph
-    from schrodinger.application.scisol.packages.fep import fep_stats
+from schrodinger.application.scisol.packages.fep.graph import Graph
+from schrodinger.application.scisol.packages.fep import fep_stats
+
 
 import helper_functions as hf
 
@@ -163,85 +160,84 @@ def calculate_tau_from_fep(graph):
     return result.correlation
 
 
-if found_schrodinger:
-    def collect_fep_pairwise_errors(files):
-        """
-        Get all the pairwise differences between the FEP+ prediction and the experimental reference values.
+def collect_fep_pairwise_errors(files):
+    """
+    Get all the pairwise differences between the FEP+ prediction and the experimental reference values.
 
-        Parameters
-        ----------
-        files: list-like
-            The paths to all the output fmp files.
+    Parameters
+    ----------
+    files: list-like
+        The paths to all the output fmp files.
 
-        Returns
-        -------
-        results: list
-            Every single pairwise difference of the predicted ddGs to experimental ddGs (in kcal/mol).
-        """
-        pairwise_diffs = []
-        for name in files:
-            g = Graph.deserialize(name)
-            exp_dgs = []
-            pred_dgs = []
-            for n in g.nodes_iter():
-                if n.exp_dg is None or n.pred_dg is None or n.is_ccc_excluded:
-                    continue
-                exp_dgs.append(n.exp_dg.val)
-                pred_dgs.append(n.pred_dg.val)
-            pairwise_diffs.extend(hf.get_pairwise_diffs(np.array(exp_dgs), np.array(pred_dgs), verbose=False))
+    Returns
+    -------
+    results: list
+        Every single pairwise difference of the predicted ddGs to experimental ddGs (in kcal/mol).
+    """
+    pairwise_diffs = []
+    for name in files:
+        g = Graph.deserialize(name)
+        exp_dgs = []
+        pred_dgs = []
+        for n in g.nodes_iter():
+            if n.exp_dg is None or n.pred_dg is None or n.is_ccc_excluded:
+                continue
+            exp_dgs.append(n.exp_dg.val)
+            pred_dgs.append(n.pred_dg.val)
+        pairwise_diffs.extend(hf.get_pairwise_diffs(np.array(exp_dgs), np.array(pred_dgs), verbose=False))
 
-        return pairwise_diffs
+    return pairwise_diffs
 
-if found_schrodinger:
-    def parse_fep_data(files):
-        """
-        Collect the FEP errors from a list of FEP+ fmp files
 
-        TODO: document format of output.
+def parse_fep_data(files):
+    """
+    Collect the FEP errors from a list of FEP+ fmp files
 
-        Parameters
-        ----------
-        files: list-like
-            The paths to all the output fmp files.
+    TODO: document format of output.
 
-        Returns
-        -------
-        results: dict
-            A dictionary containing all numpy arrays of each error metric.
-        """
-        results = {'entries':[], 'number of compounds':[], 'number of edges':[], 'Pairwise RMSE':[], 'Pairwise MUE':[],
-                   'Edgewise RMSE':[], 'Edgewise MUE':[], 'R-squared':[], 'Kendall tau':[]}
+    Parameters
+    ----------
+    files: list-like
+        The paths to all the output fmp files.
 
-        pairwise_diffs = []
-        for name in files:
-            results['entries'].append(name.split('/')[-1].split('.')[0])
-            g = Graph.deserialize(name)
+    Returns
+    -------
+    results: dict
+        A dictionary containing all numpy arrays of each error metric.
+    """
+    results = {'entries':[], 'number of compounds':[], 'number of edges':[], 'Pairwise RMSE':[], 'Pairwise MUE':[],
+               'Edgewise RMSE':[], 'Edgewise MUE':[], 'R-squared':[], 'Kendall tau':[]}
 
-            # Collect the aggregate stats
-            r = fep_stats.calculate(g)
-            results['number of compounds'].append(r['Total compounds'])
-            results['number of edges'].append(g.number_of_edges())
-            results['Edgewise RMSE'].append(r['RMSE Edgewise'].val)
-            results['Edgewise MUE'].append(r['MUE Edgewise'].val)
-            results['Pairwise RMSE'].append(r['RMSE Pairwise'].val)
-            results['Pairwise MUE'].append(r['MUE Pairwise'].val)
-            results['R-squared'].append(r['R^2'])
-            results['Kendall tau'].append(calculate_tau_from_fep(g))
+    pairwise_diffs = []
+    for name in files:
+        results['entries'].append(name.split('/')[-1].split('.')[0])
+        g = Graph.deserialize(name)
 
-            # Collect the pairwise errors
-            exp_dgs = []
-            pred_dgs = []
-            for n in g.nodes_iter():
-                if n.exp_dg is None or n.pred_dg is None or n.is_ccc_excluded:
-                    continue
-                exp_dgs.append(n.exp_dg.val)
-                pred_dgs.append(n.pred_dg.val)
-            pairwise_diffs.extend(hf.get_pairwise_diffs(np.array(exp_dgs), np.array(pred_dgs), verbose=False))
+        # Collect the aggregate stats
+        r = fep_stats.calculate(g)
+        results['number of compounds'].append(r['Total compounds'])
+        results['number of edges'].append(g.number_of_edges())
+        results['Edgewise RMSE'].append(r['RMSE Edgewise'].val)
+        results['Edgewise MUE'].append(r['MUE Edgewise'].val)
+        results['Pairwise RMSE'].append(r['RMSE Pairwise'].val)
+        results['Pairwise MUE'].append(r['MUE Pairwise'].val)
+        results['R-squared'].append(r['R^2'])
+        results['Kendall tau'].append(calculate_tau_from_fep(g))
 
-        for key in results:
-            results[key] = np.array(results[key])
+        # Collect the pairwise errors
+        exp_dgs = []
+        pred_dgs = []
+        for n in g.nodes_iter():
+            if n.exp_dg is None or n.pred_dg is None or n.is_ccc_excluded:
+                continue
+            exp_dgs.append(n.exp_dg.val)
+            pred_dgs.append(n.pred_dg.val)
+        pairwise_diffs.extend(hf.get_pairwise_diffs(np.array(exp_dgs), np.array(pred_dgs), verbose=False))
 
-        return results, np.array(pairwise_diffs)
+    for key in results:
+        results[key] = np.array(results[key])
+
+    return results, np.array(pairwise_diffs)
 
 
 def parse_fep_data_from_csv(files):
@@ -501,82 +497,97 @@ def error_diff_stats(diffs):
     print(f'{100 * frac_more_2:.1f}% of the differences are greater than 2 kcal/mol' )
 
 
-if found_schrodinger:
-    def print_latex_table(fmpnames):
-        """
-        Print out the errors for a collection of FEP+ maps in a latex formated table.
+def print_latex_table(fmpnames, out2pdb=None, out2protein=None):
+    """
+    Print out the errors for a collection of FEP+ maps in a latex formatted table.
 
-        fmpnames: list of str
-            The paths to a every FEP+ output file you want to put in a latex table.
-        """
-        num_compounds = []
-        num_edges = []
-        pairwise_rmse = []
-        edge_rmse = []
-        r2 = []
-        lines = []
-        for name in fmpnames:
-            g = Graph.deserialize(name)
-            r = fep_stats.calculate(g)
-            num_compounds.append(r['Total compounds'])
-            num_edges.append(g.number_of_edges())
-            edge_rmse.append(r['RMSE Edgewise'].val)
-            pairwise_rmse.append(r['RMSE Pairwise'].val)
-            r2.append(r['R^2'])
-            line = r'    {:35} & {} & {} & {:.2f} & {:.2f} $\pm$ {:.2f} & {:.2f} $\pm$ {:.2f} \\'.format(name.split('/')[-1],
-                                                                                               r['Total compounds'],
-                                                                                               g.number_of_edges(),
-                                                                                               r['R^2'],
-                                                                                               r['RMSE Edgewise'].val,
-                                                                                               r['RMSE Edgewise'].unc,
-                                                                                               r['RMSE Pairwise'].val,
-                                                                                               r['RMSE Pairwise'].unc)
-            lines.append(line)
+    fmpnames: list of str
+        The paths to a every FEP+ output file you want to put in a latex table.
+    out2pdb: dict
+        A dictionary that links the output filename to a PDB
+    out2protein: dict
+        A dictionary that links the output filename to a protein name.
+    """
+    num_compounds = []
+    num_edges = []
+    pairwise_rmse = []
+    edge_rmse = []
+    r2 = []
+    lines = []
+    for name in fmpnames:
+        g = Graph.deserialize(name)
+        r = fep_stats.calculate(g)
+        num_compounds.append(r['Total compounds'])
+        num_edges.append(g.number_of_edges())
+        edge_rmse.append(r['RMSE Edgewise'].val)
+        pairwise_rmse.append(r['RMSE Pairwise'].val)
+        r2.append(r['R^2'])
 
-        num_compounds = np.array(num_compounds)
-        num_edges = np.array(num_edges)
-        r2 = np.array(r2)
-        edge_rmse = np.array(edge_rmse)
-        pairwise_rmse = np.array(pairwise_rmse)
+        outname = name.split('/')[-1].split('.')[0]
+        if out2pdb is not None:
+            pdb = out2pdb[outname]
+        else:
+            pdb = 'XXXX'
+        if out2protein is not None:
+            protein = out2protein[outname]
+        else:
+            protein = outname
 
-        m, std, pair_l, pair_u  = get_bootstrap_weighted_rmsd(num_compounds, pairwise_rmse)
-        pair_m = weighted_rmsd(num_compounds, pairwise_rmse)
+        line = r'    {:35} & {} & {} & {} & {:.2f} & {:.2f} $\pm$ {:.2f} & {:.2f} $\pm$ {:.2f} \\'.format(protein,
+                                                                                           pdb,
+                                                                                           r['Total compounds'],
+                                                                                           g.number_of_edges(),
+                                                                                           r['R^2'],
+                                                                                           r['RMSE Edgewise'].val,
+                                                                                           r['RMSE Edgewise'].unc,
+                                                                                           r['RMSE Pairwise'].val,
+                                                                                           r['RMSE Pairwise'].unc)
+        lines.append(line)
 
-        m, std, edge_l, edge_u  = get_bootstrap_weighted_rmsd(num_edges, edge_rmse)
-        edge_m = weighted_rmsd(num_edges, edge_rmse)
+    num_compounds = np.array(num_compounds)
+    num_edges = np.array(num_edges)
+    r2 = np.array(r2)
+    edge_rmse = np.array(edge_rmse)
+    pairwise_rmse = np.array(pairwise_rmse)
 
-        m, std, r2_l, r2_u  = get_bootstrap_weighted_value(num_compounds, r2)
-        r2_m = weighted_mean(num_compounds, r2)
+    m, std, pair_l, pair_u  = get_bootstrap_weighted_rmsd(num_compounds, pairwise_rmse)
+    pair_m = weighted_rmsd(num_compounds, pairwise_rmse)
 
-        last_line = r'\hline {:35} & {} & {} & {:.2f} [{:.2f}, {:.2f}] & {:.2f} [{:.2f}, {:.2f}] & {:.2f} [{:.2f}, {:.2f}] \\'.format('Total/weighted mean',
-                                                                                                     np.sum(num_compounds),
-                                                                                                     np.sum(num_edges),
-                                                                                                     r2_m,
-                                                                                                     r2_l,
-                                                                                                     r2_u,
-                                                                                                     edge_m,
-                                                                                                     edge_l,
-                                                                                                     edge_u,
-                                                                                                     pair_m,
-                                                                                                     pair_l,
-                                                                                                     pair_u)
-        header = r"""\begin{table}[!ht]
-        \centering
-        \small
-        \caption{}
-        \begin{tabular}{c|c|c|c|c|c}
-        \toprule
-        System & No. compounds & No. edges & R$^2$ & Edgewise RMSE & Pairwise RMSE \\\hline"""
-        footer = r"""    \bottomrule
-            \end{tabular}
-            \label{tab:}
-    \end{table}
-        """
+    m, std, edge_l, edge_u  = get_bootstrap_weighted_rmsd(num_edges, edge_rmse)
+    edge_m = weighted_rmsd(num_edges, edge_rmse)
 
-        print(header)
-        for l in lines:
-            print(l)
-        print(last_line)
-        print(footer)
+    m, std, r2_l, r2_u  = get_bootstrap_weighted_value(num_compounds, r2)
+    r2_m = weighted_mean(num_compounds, r2)
+
+    last_line = r'\hline & {:35} & {} & {} & {:.2f} [{:.2f}, {:.2f}] & {:.2f} [{:.2f}, {:.2f}] & {:.2f} [{:.2f}, {:.2f}] \\'.format('Total/weighted mean',
+                                                                                                 np.sum(num_compounds),
+                                                                                                 np.sum(num_edges),
+                                                                                                 r2_m,
+                                                                                                 r2_l,
+                                                                                                 r2_u,
+                                                                                                 edge_m,
+                                                                                                 edge_l,
+                                                                                                 edge_u,
+                                                                                                 pair_m,
+                                                                                                 pair_l,
+                                                                                                 pair_u)
+    header = r"""\begin{table}[!ht]
+    \centering
+    \small
+    \caption{}
+    \begin{tabular}{c|c|c|c|c|c|c}
+    \toprule
+    System & PDB & No. compounds & No. edges & R$^2$ & Edgewise RMSE & Pairwise RMSE \\\hline"""
+    footer = r"""    \bottomrule
+        \end{tabular}
+        \label{tab:}
+\end{table}
+    """
+
+    print(header)
+    for l in lines:
+        print(l)
+    print(last_line)
+    print(footer)
 
 
