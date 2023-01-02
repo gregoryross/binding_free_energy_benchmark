@@ -15,6 +15,19 @@ Please see the doc-strings in each script to see how run each script. The above 
 * `helper_functions.py`
 * `analysis_functions.py`
 
+## Python dependencies
+* `numpy`
+* `scipy`
+* `matplotlib`
+* `pandas`
+* `schrodinger` (optional)
+
+If `schrodinger` is not installed (or accessible in python), then all the scrips listed above can use `csv` files as 
+input (as opposed to `fmp` files in `schrodinger` was available). The correctly formatted `csv` files for all the 
+analysis can be found in `../21_4_results/ligand_predictions` of this repository. However, using `csv` files instead of
+`fmp` files as inputs produces statistics that miscount ligands that have multiple tautomers or protomers in 
+perturbation graph. This miscounting does not occur with schrodinger is intalled and `fmp` files are used as input. 
+
 ## FEP data structure
 The FEP+ benchmark data is expected to be contained in subdirectories of a single directory. If the uppermost directory 
 is called 'upper_dir', then the FMP (or CSV) files are expected to be in subdirectories. For instance, with 2 
