@@ -9,7 +9,7 @@ both the experimental survey and FEP+ benchmark.
 * `generate_scatter_plots.py`: generate example scatter plots from the experimental survey and FEP+ benchmark.
 * `scatterplot_data/`: the directory that contains the files used in the scatter plot.
 * `write_group_summary_tables.py`: Write tables that summarize the error of each data set in the FEP+ benchmark.
-
+* `print_latex_tables.py`: Print out latex formatted tables of each groups results. Requires a Schrodinger installation.
 Please see the doc-strings in each script to see how run each script. The above scripts use functions in the following
  files:
 * `helper_functions.py`
